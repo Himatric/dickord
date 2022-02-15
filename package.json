@@ -1,0 +1,21 @@
+{
+  "name": "self",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "axios": "^0.26.0",
+    "form-data": "^4.0.0",
+    "got": "^11.8.3",
+    "node-cache": "^5.1.2",
+    "terminal-image": "^1.2.1",
+    "terminal-kit": "^2.4.0",
+    "ws": "^8.5.0"
+  }
+}
