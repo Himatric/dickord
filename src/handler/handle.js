@@ -181,7 +181,7 @@ function viewGuild(client, ID) {
         term("\n")
         if (res.selectedIndex === 0) {
             client.currentState = "showGuilds"
-            return showGuilds()
+            return showGuilds(client)
         }
         client.currentState = "inChannel"
         return viewChannel(client, channels[res.selectedIndex - 1].id)
