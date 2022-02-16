@@ -17,6 +17,9 @@ u can upload files
 
 ## why would i wanna use it ##
 not sure
+## rpc ##
+You can toggle this
+![image](https://user-images.githubusercontent.com/84233494/154243058-cd0d1d1f-3000-45ed-9ac4-d3706669c55c.png)
 
 ## usage ##
 
