@@ -37,6 +37,12 @@ function settings(client) {
         if (res.selectedIndex === 0) return idle(client)
         const [key, value] = temparray[res.selectedIndex].split(" - ")
         value === "false" ? client.settings[key] = true : client.settings[key] = false
+        if(!isNaN(value)) {
+            let current = Number(value)
+            if(current > 96) current = 5
+            else current += 5
+            client.settings[key] = current
+        }
         return settings(client)
     })
 }
@@ -70,12 +76,12 @@ const sendMessage = async (client, id, content) => {
     })
     return
 }
-async function renderImage(uri, file) {
+async function renderImage(uri, file, client) {
     if (!file) {
-        return await termImage.buffer(await got(uri).buffer(), { "height": "25%", "width": "25%" })
+        return await termImage.buffer(await got(uri).buffer(), { "height": client.settings.emojiSize + "%", "width": client.settings.emojiSize+"%" })
 
     } else {
-        return await termImage.buffer(await got(uri).buffer(), {"height": "80%", width: "80%"})
+        return await termImage.buffer(await got(uri).buffer(), {"height": client.settings.imageSize+"%", width: client.settings.imageSize+"%"})
     }
 }
 async function fetchMessages(client, id) {

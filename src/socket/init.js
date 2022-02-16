@@ -6,7 +6,7 @@ const EventEmitter = require("events")
 const { default: axios } = require("axios")
 const emitter = new EventEmitter()
 const drawImages = () => {
-    term.drawImage("images/dickord.png", {"shrink": {"height": 100, "width": 200}}, () => {
+    term.drawImage("images/dickord.png", {"shrink": {"height": 110, "width": 200}}, () => {
         term.drawImage("images/rapecord.png", {shrink: {height: 50, width: 200}})
     })
 }
@@ -90,14 +90,14 @@ const InitConsole = async (client) => {
                         const id = match.split(":")[2].replace(">", "")
                         const animated = match.split(":")[0] === "<a"
                         const url = `https://cdn.discordapp.com/emojis/${id}.png?size=320`
-                        msg.d.content = msg.d.content.replace(/(<a?)?:\w+:(\d{18}>)?/, "\n" + await renderImage(url))
+                        msg.d.content = msg.d.content.replace(/(<a?)?:\w+:(\d{18}>)?/, "\n" + await renderImage(url, false, client))
                     }
                 }
                 if(client.settings.renderImages) {
                     if(msg.d.attachments[0]) {
                         const url = msg.d.attachments[0].url
 
-                        url.endsWith(".png") || url.endsWith(".jpeg") ? msg.d.content = msg.d.content + "\n" + await renderImage(url, true) : null
+                        url.endsWith(".png") || url.endsWith(".jpeg") ? msg.d.content = msg.d.content + "\n" + await renderImage(url, true, client) : null
                     }
                 }
                 let channel = client.textChannels.get(msg.d.channel_id)
