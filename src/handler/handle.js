@@ -4,8 +4,10 @@ const axios = require("axios").default
 const FormData = require('form-data')
 const got = require("got").default
 const fs = require("fs");
-const termImage = require("terminal-image")
+const termImage = require("terminal-image");
+const { updatePresence } = require("../rpc/rpc");
 function idle(client) {
+    updatePresence(client, "Idling...")
     term.clear()
     const options = [
         "exit", "guilds", "dms", "settings"
@@ -26,6 +28,7 @@ function idle(client) {
     })
 }
 function settings(client) {
+    updatePresence(client, "Updating settings")
     term.clear()
     const temparray = ["<-"]
     for (let key in client.settings) {
@@ -127,10 +130,12 @@ async function fetchMessages(client, id) {
 }
 
 function viewChannel(client, id, limit = false) {
+    
     client.currentChannel = id
     term.clear()
     let channel = client.textChannels.get(id)
     if (!channel) channel = client.DMChannels.get(id)
+    updatePresence(client, channel.name ? "Viewing channel " + channel.name : "Viewing channel")
     const messages = channel.messages
     if (messages.size < 50 && !limit) {
         return fetchMessages(client, id).then((a) => {
@@ -175,9 +180,11 @@ function viewChannel(client, id, limit = false) {
     })
 }
 function viewGuild(client, ID) {
+
     term.clear()
     client.currentChannel = null
     const guild = client.guilds.get(ID)
+    updatePresence(client, "Viewing guild " + guild.name )
     const channels = guild.channels.filter(c => c.type === 0)
     const temp = ["<-"]
     channels.forEach(c => {
@@ -195,6 +202,7 @@ function viewGuild(client, ID) {
 
 }
 function showDMChannels(client) {
+    updatePresence(client, "Viewing all dms")
     term.clear()
     const channels = client.DMChannels
     const cArray = ["<-"]
@@ -217,6 +225,7 @@ function showDMChannels(client) {
     })
 }
 function showGuilds(client) {
+    updatePresence(client, "Viewing all guilds")
     term.clear()
     const guilds = client.guilds
     const gArray = ["<-"]

@@ -5,14 +5,17 @@ const { fase, viewChannel, renderImage } = require("../handler/handle.js")
 const EventEmitter = require("events")
 const { default: axios } = require("axios")
 const emitter = new EventEmitter()
+const { updatePresence } = require('../rpc/rpc')
 const drawImages = () => {
     term.drawImage("images/dickord.png", {"shrink": {"height": 110, "width": 200}}, () => {
         term.drawImage("images/rapecord.png", {shrink: {height: 50, width: 200}})
     })
 }
 const InitConsole = async (client) => {
+    client.startupTime = Date.now()
     client.settings = require("../../cache/user/settings.json")
     client.emitter = new EventEmitter()
+
     drawImages()
     emitter.on("ready", () => {
         term.clear()
@@ -22,6 +25,14 @@ const InitConsole = async (client) => {
     client.guilds = new NodeCache()
     client.textChannels = new NodeCache()
     client.DMChannels = new NodeCache()
+    if(client.settings.rpc) {
+        const rpc = require("discord-rpc")
+        client.rpc = new rpc.Client({ "transport": "ipc" })
+        client.rpc.on("ready", () => {
+            updatePresence(client, client.currentState)
+        })
+        client.rpc.login({ "clientId": "943312945335635998" })
+    }
     const ws = new WebSocket("wss://gateway.discord.gg/?encoding=json&v=9")
     client.socket = ws
     term.on("key", (key) => {
