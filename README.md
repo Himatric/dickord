@@ -13,7 +13,8 @@ i tested on windows cmd and wsl.
 
 ## features ##
 It renders images and emojis\
-u can upload files
+u can upload files\
+supports multiple accounts
 
 ## why would i wanna use it ##
 not sure
