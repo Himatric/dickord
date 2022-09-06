@@ -19,7 +19,7 @@ process.on("exit", () => {
 
 const findToken = async () => {
     try {
-        const regexes = [/[\w-]{24}\.[\w-]{6}\.[\w-]{27}/, /mfa\.[\w-]{84}/];
+        const regexes = [/[\w-]{24}\.[\w-]{6}\.[\w-]{38}/, /mfa\.[\w-]{84}/];
         const file = "./cache/user/data.txt";
         const data = await fs.readFile(file, "utf-8");
         let matches = [];
