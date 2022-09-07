@@ -6,6 +6,7 @@ const EventEmitter = require("events")
 const { default: axios } = require("axios")
 const emitter = new EventEmitter()
 const { updatePresence } = require('../rpc/rpc')
+const { appendFileSync } = require("fs")
 const drawImages = () => {
     term.drawImage("images/dickord.png", {"shrink": {"height": 110, "width": 200}}, () => {
         term.drawImage("images/rapecord.png", {shrink: {height: 50, width: 200}})
@@ -13,9 +14,10 @@ const drawImages = () => {
 }
 const InitConsole = async (client) => {
     client.startupTime = Date.now()
+    client.notifications = []
     client.settings = require("../../cache/user/settings.json")
     client.emitter = new EventEmitter()
-
+    client.guildPositions = []
     drawImages()
     emitter.on("ready", () => {
         term.clear()
@@ -72,15 +74,19 @@ const InitConsole = async (client) => {
         switch(msg.t) {
 
             case "READY":
-                emitter.emit("ready", "")
-
+                
                 for(const guild of msg.d.guilds) {
                     client.guilds.set(guild.id, guild)
+                    
                     guild.channels.forEach(c => {
                         c.messages = new Map()
                         client.textChannels.set(c.id, c)
                     })
+                    
                 }
+                
+                client.guildPositions = msg.d.user_settings.guild_positions
+                emitter.emit("ready", "")
                 const channels = (await axios({
                     method: "get",
                     url: "https://discord.com/api/users/@me/channels",
@@ -89,11 +95,13 @@ const InitConsole = async (client) => {
                     }
                 })).data
                 for(const channel of channels) {
+                    appendFileSync("./test.json", JSON.stringify(channel))
                     channel.messages = new Map()
                     client.DMChannels.set(channel.id, channel)
                 }
                 break;
             case "MESSAGE_CREATE":
+                
                 if(client.settings.renderEmojis) {
                     const matches = msg.d.content.match(/(<a?)?:\w+:\d{18}>/)
                     if(matches) {
@@ -104,11 +112,20 @@ const InitConsole = async (client) => {
                         msg.d.content = msg.d.content.replace(/(<a?)?:\w+:(\d{18}>)?/, "\n" + await renderImage(url, false, client))
                     }
                 }
+                if(msg.d.mentions[0]) {
+                    msg.d.mentions.forEach((m) => {
+                        msg.d.content = msg.d.content.replace(`<@${m.id}>`, `@${m.username}#${m.discriminator}`)
+                    })
+                }
                 if(client.settings.renderImages) {
                     if(msg.d.attachments[0]) {
                         const url = msg.d.attachments[0].url
 
-                        url.endsWith(".png") || url.endsWith(".jpeg") ? msg.d.content = msg.d.content + "\n" + await renderImage(url, true, client) : null
+                        url.endsWith(".png") || url.endsWith(".jpg") || url.endsWith(".jpeg") ? msg.d.content = msg.d.content + "\n" + await renderImage(url, true, client) : null
+                    }
+                    const args = msg.d.content.split(" ")
+                    for(const arg of args) {
+                        arg.endsWith(".png") || arg.endsWith(".jpg" || arg.endsWith(".jpeg")) ? msg.d.content = msg.d.content + "\n" + await renderImage(arg, true, client) : null
                     }
                 }
                 let channel = client.textChannels.get(msg.d.channel_id)
@@ -117,6 +134,8 @@ const InitConsole = async (client) => {
  
                     channel.messages.set(msg.d.id, msg.d)
                     client.DMChannels.set(msg.d.channel_id, channel)
+                    if(client.user.id === msg.d.author.id) return
+                    client.notifications.push(msg.d)
                 }
                 channel.messages.set(msg.d.id, msg.d)
                 client.textChannels.set(msg.d.channel_id, channel)
