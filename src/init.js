@@ -79,7 +79,7 @@ const askToken = async () => {
 
 }
 const init = async (e) => {
-    term.windowTitle("Disconsole - version 1.0")
+    term.windowTitle("Dickord - version 1.0")
     let tokens = false;
     if (!e) {
         term.clear()
@@ -130,6 +130,7 @@ const getUserData = async (token) => {
         })).data
         return data
     } catch (err) {
+        console.log("Error!!", err)
         writeFileSync("./cache/user/data.txt", "")
         process.exit()
     }
