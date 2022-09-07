@@ -12,21 +12,50 @@ function idle(client) {
     const options = [
         "exit", "guilds", "dms", "settings"
     ]
+    client.notifications[0] ? options.push("notifications: " + client.notifications.length) : null
     term.singleLineMenu(options, (err, res) => {
         const option = res.selectedText
-        switch (option) {
-            case "exit":
+        switch (true) {
+            case option === "exit":
                 process.exit(0)
-            case "guilds":
+            case option === "guilds":
                 client.currentState = "showGuilds"
                 return showGuilds(client)
-            case "dms":
+            case option === "dms":
                 return showDMChannels(client)
-            case "settings":
+            case option === "settings":
                 return settings(client)
+            case option.includes("notifications"):
+                return showNotifications(client)
         }
     })
 }
+function showNotifications(client) {
+    const cArray = ["<-"]
+    const channelIDS = [""]
+    client.notifications.forEach((msg) =>  {
+        cArray.push(msg.author.username)
+        channelIDS.push(msg.channel_id)
+    })
+    term.singleRowMenu(cArray, (err, res) => {
+        term("\n")
+        if (res.selectedIndex === 0) {
+            client.currentState = "IDLE"
+            return idle(client)
+
+        }
+        const index = res.selectedIndex
+        const guildID = channelIDS[index]
+        client.notifications = client.notifications.filter(a => a.channel_id !== guildID)
+        console.log(client.notifications.length)
+        client.currentState = "inChannel"
+        return viewChannel(client, guildID)
+
+
+    })
+
+}
+
 function settings(client) {
     updatePresence(client, "Updating settings")
     term.clear()
@@ -54,7 +83,7 @@ const sendFile = async (client, id, img) => {
         "Authorization": client.user.token,
     }
     const url = "https://discord.com/api/channels/" + id + "/messages"
-    var formdata = new FormData();
+    let formdata = new FormData();
     formdata.append("file", fs.createReadStream(img), { filename: img });
     formdata.append("payload_json", `{"content": "","tts":false}`)
     await got.post(url, {
@@ -162,6 +191,7 @@ function viewChannel(client, id, limit = false) {
 
     })
     term.inputField(null, (err, res) => {
+        
         if (client.currentState !== "inChannel") return
         if (!res) return viewChannel(client, id, limit)
         else if (res.startsWith("/file")) {
@@ -225,6 +255,7 @@ function showDMChannels(client) {
     })
 }
 function showGuilds(client) {
+    client.currentChannel = null
     updatePresence(client, "Viewing all guilds")
     term.clear()
     const guilds = client.guilds
@@ -235,7 +266,7 @@ function showGuilds(client) {
         gArray.push(guild.name)
         gArrayIDS.push(k)
     })
-    term.singleLineMenu(gArray, (err, res) => {
+    term.singleRowMenu(gArray, (err, res) => {
         term("\n")
         if (res.selectedIndex === 0) {
             client.currentState = "IDLE"
